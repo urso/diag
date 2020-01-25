@@ -1,6 +1,8 @@
 Diagnostic Contexts
 ===================
 
+Go documentation: https://godoc.org/github.com/urso/diag
+
 Package diag provides a diagnostic context that can be used to record
 contextual information about the current scope, that needs to be reported.
 Diagnostic contexts can be used for logging, to add context when wrapping
