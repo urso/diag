@@ -1,3 +1,9 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//        http://www.apache.org/licenses/LICENSE-2.0
+
 // Package ctxfmt provides formatters similar to the fmt package, that support
 // capturing named fields from within the format string. The functions provided
 // here shoud be used by other packages wanting to provide custom APIs
