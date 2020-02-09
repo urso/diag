@@ -14,7 +14,6 @@ import (
 
 func TestCtxBuild(t *testing.T) {
 	t.Run("new empty context", func(t *testing.T) {
-
 		ctx := diag.NewContext(nil, nil)
 		assertCtx(t, nil, ctx)
 	})
@@ -73,6 +72,40 @@ func TestCtxBuild(t *testing.T) {
 		assertCtx(t, map[string]interface{}{
 			"hello":     "world",
 			"overwrite": 1,
+		}, ctx)
+	})
+
+	t.Run("new context with empty 'before' intermediate", func(t *testing.T) {
+		ctx := diag.NewContext(
+			// before
+			diag.NewContext(
+				makeCtx(nil, nil, diag.String("hello", "world")),
+				nil,
+			),
+
+			//after
+			nil,
+		)
+
+		assertCtx(t, map[string]interface{}{
+			"hello": "world",
+		}, ctx)
+	})
+
+	t.Run("new context with empty 'after' intermediate", func(t *testing.T) {
+		ctx := diag.NewContext(
+			// before
+			nil,
+
+			// after
+			diag.NewContext(
+				nil,
+				makeCtx(nil, nil, diag.String("hello", "world")),
+			),
+		)
+
+		assertCtx(t, map[string]interface{}{
+			"hello": "world",
 		}, ctx)
 	})
 }
