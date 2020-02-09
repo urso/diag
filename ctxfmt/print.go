@@ -6,32 +6,67 @@ import (
 )
 
 type printer struct {
-	To io.Writer
+	To      io.Writer
+	written int
+	err     error
 }
 
 func (p *printer) Write(buf []byte) (int, error) {
-	return p.To.Write(buf)
+	if p.err != nil {
+		return 0, p.err
+	}
+
+	return p.doWrite(buf)
+}
+
+func (p *printer) doWrite(buf []byte) (int, error) {
+	return p.upd(p.To.Write(buf))
+}
+
+func (p *printer) upd(n int, err error) (int, error) {
+	p.written += n
+	p.err = err
+	return n, err
 }
 
 func (p *printer) WriteByte(b byte) error {
-	if bw, ok := p.To.(io.ByteWriter); ok {
-		return bw.WriteByte(b)
+	if p.err != nil {
+		return p.err
 	}
 
-	_, err := p.To.Write([]byte{b})
+	if bw, ok := p.To.(io.ByteWriter); ok {
+		err := bw.WriteByte(b)
+		if err != nil {
+			p.err = err
+		} else {
+			p.written++
+		}
+		return err
+	}
+
+	_, err := p.doWrite([]byte{b})
 	return err
 }
 
 func (p *printer) WriteString(s string) (int, error) {
-	if sw, ok := p.To.(io.StringWriter); ok {
-		return sw.WriteString(s)
+	if p.err != nil {
+		return 0, p.err
 	}
-	return p.To.Write(unsafeBytes(s))
+
+	if sw, ok := p.To.(io.StringWriter); ok {
+		return p.upd(sw.WriteString(s))
+	}
+	return p.doWrite(unsafeBytes(s))
 }
 
 func (p *printer) WriteRune(r rune) error {
+	if p.err != nil {
+		return p.err
+	}
+
 	if rw, ok := p.To.(interface{ WriteRune(rune) error }); ok {
-		return rw.WriteRune(r)
+		p.err = rw.WriteRune(r)
+		return p.err
 	}
 
 	if r < utf8.RuneSelf {
@@ -40,7 +75,7 @@ func (p *printer) WriteRune(r rune) error {
 
 	var runeBuf [utf8.UTFMax]byte
 	n := utf8.EncodeRune(runeBuf[:], r)
-	_, err := p.Write(runeBuf[:n])
+	_, err := p.doWrite(runeBuf[:n])
 	return err
 }
 
