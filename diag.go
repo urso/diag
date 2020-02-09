@@ -153,6 +153,20 @@ func makeSnapshot(ctx *Context) *Context {
 	if ctx.Len() == 0 {
 		return nil
 	}
+	if len(ctx.fields) > 0 {
+		return cloneContext(ctx)
+	}
+
+	if ctx.before.Len() == 0 {
+		return ctx.after
+	} else if ctx.after.Len() == 0 {
+		return ctx.before
+	} else {
+		return cloneContext(ctx)
+	}
+}
+
+func cloneContext(ctx *Context) *Context {
 	snapshot := *ctx
 	return &snapshot
 }
