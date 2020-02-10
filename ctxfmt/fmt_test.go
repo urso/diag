@@ -12,7 +12,6 @@ package ctxfmt
 
 import (
 	"fmt"
-	"io"
 	"math"
 	"reflect"
 	"strings"
@@ -136,7 +135,7 @@ var byteFormatterSlice = []byteFormatter{'h', 'e', 'l', 'l', 'o'}
 type writeStringFormatter string
 
 func (sf writeStringFormatter) Format(f fmt.State, c rune) {
-	if sw, ok := f.(io.StringWriter); ok {
+	if sw, ok := f.(interface{ WriteString(string) (int, error) }); ok {
 		sw.WriteString("***" + string(sf) + "***")
 	}
 }

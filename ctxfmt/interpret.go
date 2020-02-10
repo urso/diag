@@ -249,7 +249,7 @@ func (in *interpreter) fmtValue(tok *formatToken, v reflect.Value, depth int) {
 			in.p.WriteString("map[")
 		}
 
-		for iter, i := v.MapRange(), 0; iter.Next(); i++ {
+		for iter, i := newMapIter(v), 0; iter.Next(); i++ {
 			if i > 0 {
 				if flags.sharpV {
 					in.p.WriteString(", ")

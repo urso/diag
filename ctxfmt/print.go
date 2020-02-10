@@ -59,7 +59,7 @@ func (p *printer) WriteString(s string) (int, error) {
 		return 0, p.err
 	}
 
-	if sw, ok := p.To.(io.StringWriter); ok {
+	if sw, ok := p.To.(interface{ WriteString(string) (int, error) }); ok {
 		return p.upd(sw.WriteString(s))
 	}
 	return p.doWrite(unsafeBytes(s))
